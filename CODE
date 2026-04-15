@@ -9,15 +9,10 @@ import os
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
 
-# ==============================================================================
 # БАЗОВЫЕ КЛАССЫ И ИНФРАСТРУКТУРА
-# ==============================================================================
 
 class Content(ABC):
-    """
-    Абстрактный базовый класс для любого контента в социальной сети.
-    Реализует принцип Наследования и Полиморфизма.
-    """
+    """Абстрактный базовый класс для любого контента в социальной сети. Реализует принцип наследования и полиморфизма."""
     def __init__(self, text: str, author_id: str):
         self._id = str(uuid.uuid4())
         self._text = text
@@ -26,7 +21,7 @@ class Content(ABC):
 
     @abstractmethod
     def render(self) -> str:
-        """Метод для отображения контента (Полиморфизм)."""
+        """Метод для отображения контента (полиморфизм)."""
         pass
 
     @abstractmethod
@@ -119,15 +114,10 @@ class Message(Content):
         return msg
 
 
-# ==============================================================================
 # ПОЛЬЗОВАТЕЛЬ
-# ==============================================================================
 
 class User:
-    """
-    Класс Пользователя.
-    Реализует принцип Инкапсуляции (скрытие пароля и внутренних списков).
-    """
+    """Класс Пользователя. Реализует принцип инкапсуляции (скрытие пароля и внутренних списков)."""
     def __init__(self, username: str, password: str):
         self._id = str(uuid.uuid4())
         self._username = username
@@ -137,7 +127,7 @@ class User:
         self._inbox: List[Message] = []
         self._outbox: List[Message] = []
 
-    # --- Инкапсуляция: Геттеры и Сеттеры ---
+    # Геттеры и сеттеры 
     @property
     def id(self):
         return self._id
@@ -156,7 +146,7 @@ class User:
             return True
         return False
 
-    # --- Логика Друзей ---
+    # Логика друзей
     def add_friend(self, friend_id: str):
         if friend_id not in self._friends_ids and friend_id != self._id:
             self._friends_ids.append(friend_id)
@@ -168,7 +158,7 @@ class User:
     def get_friends_ids(self) -> List[str]:
         return self._friends_ids.copy()
 
-    # --- Логика Публикаций ---
+    # Логика публикаций
     def create_post(self, text: str) -> Post:
         post = Post(text, self._id)
         self._posts.append(post)
@@ -177,7 +167,7 @@ class User:
     def get_posts(self) -> List[Post]:
         return self._posts.copy()
 
-    # --- Логика Сообщений ---
+    # Логика сообщений
     def receive_message(self, message: Message):
         self._inbox.append(message)
 
@@ -193,7 +183,7 @@ class User:
     def get_outbox(self) -> List[Message]:
         return self._outbox.copy()
 
-    # --- Сериализация ---
+    # Сериализация
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self._id,
@@ -221,7 +211,7 @@ class User:
         return user
 
     def export_profile_to_file(self, filename: str = None):
-        """Сохранение профиля в отдельный текстовый файл (Требование №3 вариативное)."""
+        """Сохранение профиля в отдельный текстовый файл."""
         if not filename:
             filename = f"{self._username}_profile.txt"
         
@@ -242,15 +232,10 @@ class User:
         print(f"[СИСТЕМА] Профиль успешно сохранен в файл: {filename}")
 
 
-# ==============================================================================
 # УПРАВЛЕНИЕ СЕТЬЮ (КОНТРОЛЛЕР)
-# ==============================================================================
 
 class SocialNetwork:
-    """
-    Класс-менеджер социальной сети.
-    Отвечает за регистрацию, вход, сохранение и загрузку базы данных.
-    """
+    """Класс-менеджер социальной сети. Отвечает за регистрацию, вход, сохранение и загрузку базы данных."""
     DB_FILE = "network_db.json"
 
     def __init__(self):
@@ -334,9 +319,7 @@ class SocialNetwork:
         return self._current_user
 
 
-# ==============================================================================
 # КОНСОЛЬНЫЙ ИНТЕРФЕЙС (UI)
-# ==============================================================================
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -500,7 +483,7 @@ def menu_posts(user: User, network: SocialNetwork):
                 if f_user:
                     found_posts.extend(f_user.get_posts())
             
-            # Сортировка по времени (упрощенно по порядку добавления в этом примере)
+            # Сортировка по времени
             if not found_posts:
                 print("Лента пуста.")
             else:
@@ -573,9 +556,7 @@ def menu_settings(user: User, network: SocialNetwork):
         else:
             print("Неверный старый пароль.")
 
-# ==============================================================================
-# ТОЧКА ВХОДА
-# ==============================================================================
+# РЕАЛИЗАЦИЯ
 
 if __name__ == "__main__":
     # Инициализация сети
