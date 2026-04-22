@@ -31,7 +31,7 @@ class Content(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls,  Dict[str, Any]) -> 'Content':
+    def from_dict(cls, data:  Dict[str, Any]) -> 'Content':
         """Метод для десериализации объекта из словаря."""
         pass
 
@@ -73,7 +73,7 @@ class Post(Content):
         }
 
     @classmethod
-    def from_dict(cls,  Dict[str, Any]) -> 'Post':
+    def from_dict(cls, data: Dict[str, Any]) -> 'Post':
         post = cls(data['text'], data['author_id'], data.get('likes', 0))
         post._id = data['id']
         post._timestamp = data['timestamp']
@@ -106,7 +106,7 @@ class Message(Content):
         }
 
     @classmethod
-    def from_dict(cls,  Dict[str, Any]) -> 'Message':
+    def from_dict(cls, data: Dict[str, Any]) -> 'Message':
         msg = cls(data['text'], data['author_id'], data['receiver_id'])
         msg._id = data['id']
         msg._timestamp = data['timestamp']
@@ -196,7 +196,7 @@ class User:
         }
 
     @classmethod
-    def from_dict(cls,  Dict[str, Any]) -> 'User':
+    def from_dict(cls, data: Dict[str, Any]) -> 'User':
         user = cls(data['username'], data['password'])
         user._id = data['id']
         user._friends_ids = data.get('friends_ids', [])
@@ -255,7 +255,7 @@ class SocialNetwork:
             
             # Сначала создаем всех пользователей
             temp_users = {}
-            for u_data in 
+            for u_data in temp_users:
                 user = User.from_dict(u_data)
                 temp_users[user.id] = user
             
