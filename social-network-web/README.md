@@ -47,6 +47,12 @@ POST /logout для выхода из системы.
 3. Создание публикации: выполните POST запрос на /api/posts с заголовком Authorization содержащим Bearer токен и JSON телом содержащим text.
 4. Получение ленты: выполните GET запрос на /api/feed с заголовком Authorization содержащим Bearer токен.
 
+## Установка
+1. Склонируйте репозиторий командой git clone и перейдите в папку social-network-web.
+2. Установите зависимости командой pip install -r requirements.txt из папки backend.
+3. - Запуск **Backend**: перейдите в папку backend и выполните команду python main.py. Сервер запустится на http://localhost:8000
+- Запуск **Frontend**: откройте файл frontend/index.html в браузере напрямую или запустите Python HTTP сервер командой python -m http.server 3000 из папки frontend и откройте http://localhost:3000
+- **Проверка API**: откройте в браузере http://localhost:8000/docs для Swagger UI или http://localhost:8000/redoc для ReDoc.
 ## Важные замечания
 1. Безопасность: пароли хранятся в открытом виде
 2. CORS настроен для локальной разработки
