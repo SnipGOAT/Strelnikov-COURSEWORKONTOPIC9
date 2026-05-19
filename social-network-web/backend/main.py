@@ -258,6 +258,55 @@ async def get_outbox(current_user: User = Depends(get_current_user)):
         ]
     }
 
+
+# ==============================================================================
+# API ENDPOINTS - РЕДАКТИРОВАНИЕ И УДАЛЕНИЕ ПУБЛИКАЦИЙ
+# ==============================================================================
+
+@app.put("/api/posts/{post_id}", response_model=PostResponse)
+async def update_post(
+    post_id: str,
+    post_data: PostCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Редактирование публикации (только в течение 30 минут)"""
+    post = current_user.find_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Публикация не найдена")
+    if post.author_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Нет прав на редактирование")
+    if not current_user.can_edit_post(post):
+        raise HTTPException(status_code=400, detail="Редактирование доступно только в течение 30 минут")
+    
+    post._text = post_data.text
+    network._save_db()
+    
+    return PostResponse(
+        id=post.id,
+        text=post.text,
+        author_id=post.author_id,
+        timestamp=post.timestamp,
+        likes=post._likes
+    )
+
+@app.delete("/api/posts/{post_id}")
+async def delete_post(
+    post_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Удаление публикации"""
+    post = current_user.find_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Публикация не найдена")
+    if post.author_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Нет прав на удаление")
+    
+    if current_user.delete_post(post_id):
+        network._save_db()
+        return {"message": "Публикация удалена"}
+    raise HTTPException(status_code=500, detail="Ошибка при удалении")
+
+
 # ==============================================================================
 # ЗАПУСК
 # ==============================================================================

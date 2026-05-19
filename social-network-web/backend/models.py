@@ -190,6 +190,38 @@ class User:
 
     def get_posts(self) -> List[Post]:
         return self._posts.copy()
+    
+    def find_post_by_id(self, post_id: str) -> Optional[Post]:
+        """Поиск публикации по ID"""
+        for post in self._posts:
+            if post.id == post_id:
+                return post
+        return None
+
+    def can_edit_post(self, post: Post) -> bool:
+        """Проверка: можно ли редактировать пост (не прошло 30 минут)"""
+        post_time = datetime.strptime(post.timestamp, "%Y-%m-%d %H:%M:%S")
+        now = datetime.now()
+        time_diff = (now - post_time).total_seconds()
+        return time_diff <= 1800  # 30 минут = 1800 секунд
+
+    def edit_post(self, post_id: str, new_text: str) -> bool:
+        """Редактирование текста публикации"""
+        post = self.find_post_by_id(post_id)
+        if not post:
+            return False
+        if not self.can_edit_post(post):
+            return False  # Время вышло
+        post._text = new_text
+        return True
+
+    def delete_post(self, post_id: str) -> bool:
+        """Удаление публикации"""
+        post = self.find_post_by_id(post_id)
+        if not post:
+            return False
+        self._posts.remove(post)
+        return True
 
     def receive_message(self, message: Message):
         self._inbox.append(message)

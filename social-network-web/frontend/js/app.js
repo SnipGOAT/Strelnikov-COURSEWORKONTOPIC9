@@ -184,18 +184,43 @@ async function loadPosts() {
         list.innerHTML = '';
 
         if (data.posts.length === 0) {
-            list.innerHTML = '<p>Публикаций нет</p>';
+            list.innerHTML = '<p class="empty-message">Публикаций нет</p>';
             return;
         }
 
         data.posts.reverse().forEach(post => {
+            // Проверяем можно ли редактировать (30 минут)
+            const postTime = new Date(post.timestamp.replace(' ', 'T'));
+            const now = new Date();
+            const minutesDiff = (now - postTime) / 1000 / 60;
+            const canEdit = minutesDiff <= 30;
+            const timeLeft = Math.round(30 - minutesDiff);
+
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <h3>Публикация</h3>
-                <p>${post.text}</p>
-                <p class="timestamp">${post.timestamp}</p>
-                <p>❤️ ${post.likes}</p>
+                <div class="post-header">
+                    <div class="avatar">${post.author_id.slice(0, 2).toUpperCase()}</div>
+                    <div>
+                        <div class="post-author">Вы</div>
+                        <div class="timestamp">${post.timestamp}</div>
+                    </div>
+                </div>
+                <p class="post-content" id="post-text-${post.id}">${post.text}</p>
+                <div class="post-footer">
+                    <span>❤️ ${post.likes}</span>
+                    ${canEdit ? `<span class="edit-time-warning">✏️ можно редактировать ещё ${timeLeft} мин</span>` : ''}
+                </div>
+                <div class="post-actions">
+                    <button onclick="editPost('${post.id}', ${JSON.stringify(post.text).replace(/'/g, "\\'")})" 
+                            class="action-btn edit" 
+                            ${!canEdit ? 'disabled title="Время редактирования истекло"' : ''}>
+                        ✏️ Изменить
+                    </button>
+                    <button onclick="deletePost('${post.id}')" class="action-btn delete">
+                        🗑️ Удалить
+                    </button>
+                </div>
             `;
             list.appendChild(card);
         });
@@ -203,6 +228,7 @@ async function loadPosts() {
         document.getElementById('profile-posts-count').textContent = data.posts.length;
     } catch (error) {
         console.error(error);
+        list.innerHTML = '<p class="error">Ошибка загрузки публикаций</p>';
     }
 }
 
@@ -225,27 +251,133 @@ async function loadFeed() {
         const data = await apiRequest('/feed');
         const list = document.getElementById('feed-list');
         list.innerHTML = '';
+        const currentUserId = getToken();  // Получаем ID текущего пользователя
 
         if (data.feed.length === 0) {
-            list.innerHTML = '<p>Лента пуста</p>';
+            list.innerHTML = '<p class="empty-message">Лента пуста</p>';
             return;
         }
 
         data.feed.forEach(post => {
+            const isOwnPost = post.author_id === currentUserId;
+            
+            // Проверяем можно ли редактировать (только для своих постов)
+            const postTime = new Date(post.timestamp.replace(' ', 'T'));
+            const now = new Date();
+            const minutesDiff = (now - postTime) / 1000 / 60;
+            const canEdit = isOwnPost && minutesDiff <= 30;
+            const timeLeft = Math.round(30 - minutesDiff);
+
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <h3>Автор: ${post.author_name}</h3>
-                <p>${post.text}</p>
-                <p class="timestamp">${post.timestamp}</p>
-                <p>❤️ ${post.likes}</p>
+                <div class="post-header">
+                    <div class="avatar">${post.author_name?.slice(0, 2).toUpperCase() || '??'}</div>
+                    <div>
+                        <div class="post-author">${post.author_name || 'Unknown'}</div>
+                        <div class="timestamp">${post.timestamp}</div>
+                    </div>
+                </div>
+                <p class="post-content">${post.text}</p>
+                <div class="post-footer">
+                    <span>❤️ ${post.likes}</span>
+                    ${canEdit ? `<span class="edit-time-warning">✏️ можно редактировать ещё ${timeLeft} мин</span>` : ''}
+                </div>
+                ${isOwnPost ? `
+                <div class="post-actions">
+                    <button onclick="editPost('${post.id}', ${JSON.stringify(post.text).replace(/'/g, "\\'")})" 
+                            class="action-btn edit"
+                            ${!canEdit ? 'disabled title="Время редактирования истекло"' : ''}>
+                        ✏️ Изменить
+                    </button>
+                    <button onclick="deletePost('${post.id}')" class="action-btn delete">
+                        🗑️ Удалить
+                    </button>
+                </div>
+                ` : ''}
             `;
             list.appendChild(card);
         });
     } catch (error) {
         console.error(error);
+        list.innerHTML = '<p class="error">Ошибка загрузки ленты</p>';
     }
 }
+
+
+// ==============================================================================
+// РЕДАКТИРОВАНИЕ И УДАЛЕНИЕ ПУБЛИКАЦИЙ
+// ==============================================================================
+
+async function editPost(postId, currentText) {
+    // Создаём модальное окно для редактирования
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>Редактировать публикацию</h3>
+            <textarea id="edit-text" rows="4">${currentText}</textarea>
+            <div class="modal-buttons">
+                <button onclick="savePostEdit('${postId}')" class="btn btn-primary">Сохранить</button>
+                <button onclick="closeModal(this)" class="btn btn-secondary">Отмена</button>
+            </div>
+            <p class="modal-hint">⏱ Редактирование доступно в течение 30 минут</p>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+async function savePostEdit(postId) {
+    const newText = document.getElementById('edit-text').value;
+    if (!newText) {
+        showError('Текст не может быть пустым');
+        return;
+    }
+
+    try {
+        await apiRequest(`/posts/${postId}`, 'PUT', { text: newText });
+        showSuccess('Публикация обновлена!');
+        closeModal();
+        loadPosts();  // Обновляем список
+        loadFeed();   // Обновляем ленту
+    } catch (error) {
+        if (error.message.includes('30 минут')) {
+            showError('Время для редактирования истекло (30 минут)');
+        } else {
+            showError(error.message);
+        }
+    }
+}
+
+async function deletePost(postId) {
+    if (!confirm('Вы уверены что хотите удалить эту публикацию?')) {
+        return;
+    }
+
+    try {
+        await apiRequest(`/posts/${postId}`, 'DELETE');
+        showSuccess('Публикация удалена!');
+        loadPosts();  // Обновляем список
+        loadFeed();   // Обновляем ленту
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+function closeModal(element = null) {
+    const modal = document.querySelector('.modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Закрытие модального окна по клику вне его
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        closeModal();
+    }
+});
+
 
 // ==============================================================================
 // СООБЩЕНИЯ
