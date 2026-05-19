@@ -1,7 +1,51 @@
 /* ============================================ */
-/* БАЗОВЫЕ НАСТРОЙКИ */
+/* СОВРЕМЕННЫЙ CSS С ПОДДЕРЖКОЙ ТЕМ (СВЕТЛАЯ/ТЁМНАЯ) */
+/* И ПЛАВНЫМИ ПЕРЕХОДАМИ ПРИ НАЖАТИЯХ */
 /* ============================================ */
 
+/* ---------- CSS-ПЕРЕМЕННЫЕ (СВЕТЛАЯ ТЕМА ПО УМОЛЧАНИЮ) ---------- */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f0f2f5;
+  --bg-tertiary: #e4e6eb;
+  --text-primary: #050505;
+  --text-secondary: #65676b;
+  --accent: #1877f2;
+  --accent-hover: #166fe5;
+  --accent-light: #e7f3ff;
+  --danger: #fa3e3e;
+  --success: #31a24c;
+  --border: #dddddd;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-full: 50%;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ---------- ТЁМНАЯ ТЕМА ---------- */
+[data-theme="dark"] {
+  --bg-primary: #1c1e21;
+  --bg-secondary: #18191a;
+  --bg-tertiary: #3a3b3c;
+  --text-primary: #e4e6eb;
+  --text-secondary: #b0b3b8;
+  --accent: #2d88ff;
+  --accent-hover: #1a75ff;
+  --accent-light: #263951;
+  --danger: #ff6b6b;
+  --success: #42b72a;
+  --border: #3e4042;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================ */
+/* БАЗОВЫЕ НАСТРОЙКИ */
+/* ============================================ */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,16 +53,24 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f0f2f5;
-  color: #050505;
+  font-family: var(--font-family);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   min-height: 100vh;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
+  line-height: 1.5;
+}
+
+/* Плавный переход для всех интерактивных элементов */
+a, button, input, textarea, .sidebar-item, .tab-btn, .action-btn, .widgets-item {
+  transition: background-color var(--transition-fast), color var(--transition-fast),
+              border-color var(--transition-fast), box-shadow var(--transition-fast),
+              transform var(--transition-fast);
 }
 
 /* ============================================ */
 /* КОНТЕЙНЕР */
 /* ============================================ */
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -28,21 +80,21 @@ body {
 /* ============================================ */
 /* ШАПКА */
 /* ============================================ */
-
 header {
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 16px 24px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  transition: background-color var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 header h1 {
   font-size: 24px;
-  color: #1877f2;
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -53,43 +105,53 @@ header nav {
 }
 
 header nav a {
-  color: #65676b;
+  color: var(--text-secondary);
   text-decoration: none;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
-  transition: background 0.3s;
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 header nav a:hover {
-  background-color: #f0f2f5;
-  color: #1877f2;
+  background-color: var(--bg-secondary);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+header nav a:active {
+  transform: scale(0.97);
 }
 
 header nav button {
-  background: #e4e6eb;
-  color: #050505;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 header nav button:hover {
-  background: #d8dadf;
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+header nav button:active {
+  transform: scale(0.96);
 }
 
 header #user-name {
   font-weight: 600;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 /* ============================================ */
-/* СЕТКА ПРИЛОЖЕНИЯ (для dashboard) */
+/* СЕТКА ПРИЛОЖЕНИЯ (dashboard) */
 /* ============================================ */
-
 .app-container {
   display: grid;
   grid-template-columns: 240px 1fr 320px;
@@ -102,40 +164,44 @@ header #user-name {
 /* ============================================ */
 /* САЙДБАР (левая панель) */
 /* ============================================ */
-
 .sidebar {
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   height: fit-content;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 .sidebar-item {
   padding: 12px;
   margin-bottom: 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  color: #65676b;
+  color: var(--text-secondary);
   font-weight: 500;
-  transition: background 0.3s;
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .sidebar-item:hover {
-  background-color: #f0f2f5;
-  color: #1877f2;
+  background-color: var(--bg-secondary);
+  color: var(--accent);
+  transform: translateX(2px);
+}
+
+.sidebar-item:active {
+  transform: scale(0.98);
 }
 
 .sidebar-item.active {
-  background-color: #e7f3ff;
-  color: #1877f2;
+  background-color: var(--accent-light);
+  color: var(--accent);
   font-weight: 600;
 }
 
 /* ============================================ */
 /* ОСНОВНОЙ КОНТЕНТ */
 /* ============================================ */
-
 main {
   padding: 0;
 }
@@ -143,35 +209,42 @@ main {
 /* ============================================ */
 /* ВКЛАДКИ (ТАБЫ) */
 /* ============================================ */
-
 .tabs {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-smooth);
 }
 
 .tab-btn {
   padding: 10px 20px;
-  background: #f0f2f5;
+  background: var(--bg-secondary);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 500;
-  color: #65676b;
-  transition: all 0.3s;
+  color: var(--text-secondary);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .tab-btn:hover {
-  background: #e4e6eb;
+  background: var(--bg-tertiary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-btn:active {
+  transform: scale(0.96);
 }
 
 .tab-btn.active {
-  background: #1877f2;
+  background: var(--accent);
   color: white;
+  box-shadow: 0 4px 8px rgba(24, 119, 242, 0.3);
 }
 
 .tab-content {
@@ -185,7 +258,6 @@ main {
 /* ============================================ */
 /* ЛЕНТА И ПОСТЫ */
 /* ============================================ */
-
 .feed {
   display: flex;
   flex-direction: column;
@@ -193,11 +265,17 @@ main {
 }
 
 .post-card, .card {
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 16px;
+  transition: background-color var(--transition-smooth), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.post-card:hover, .card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .post-header {
@@ -209,54 +287,61 @@ main {
 .avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   margin-right: 12px;
-  background: #e4e6eb;
+  background: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: #1877f2;
+  color: var(--accent);
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
 .post-author {
   font-weight: 600;
   font-size: 15px;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 .post-content, .card p {
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 12px;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 .post-actions {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #e4e6eb;
+  border-top: 1px solid var(--border);
   padding-top: 12px;
+  transition: border-color var(--transition-smooth);
 }
 
 .action-btn {
   background: none;
   border: none;
-  color: #65676b;
+  color: var(--text-secondary);
   font-weight: 600;
   cursor: pointer;
   padding: 8px 12px;
-  border-radius: 6px;
-  transition: background 0.3s;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .action-btn:hover {
-  background: #f0f2f5;
-  color: #1877f2;
+  background: var(--bg-secondary);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
 }
 
 .timestamp {
-  color: #65676b;
+  color: var(--text-secondary);
   font-size: 12px;
   margin-top: 8px;
 }
@@ -264,14 +349,14 @@ main {
 /* ============================================ */
 /* ФОРМЫ */
 /* ============================================ */
-
 .auth-form {
   max-width: 400px;
   margin: 50px auto;
   padding: 24px;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 .form-group {
@@ -282,7 +367,7 @@ main {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #050505;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -290,50 +375,63 @@ main {
 .form-group textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: 14px;
-  transition: border-color 0.3s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-smooth), color var(--transition-smooth);
   font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #1877f2;
-  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.2);
 }
 
 /* ============================================ */
 /* КНОПКИ */
 /* ============================================ */
-
 .btn {
   padding: 10px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
-  transition: all 0.3s;
+  transition: background-color var(--transition-fast), color var(--transition-fast),
+              transform var(--transition-fast), box-shadow var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn:active {
+  transform: scale(0.95);
 }
 
 .btn-primary {
-  background: #1877f2;
+  background: var(--accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background: #166fe5;
+  background: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: #e4e6eb;
-  color: #050505;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .btn-secondary:hover {
-  background: #d8dadf;
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 .buttons {
@@ -345,48 +443,51 @@ main {
 /* ============================================ */
 /* ПРАВАЯ ПАНЕЛЬ (ВИДЖЕТЫ) */
 /* ============================================ */
-
 .widgets {
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   height: fit-content;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 .widgets h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 12px;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 .widgets-item {
   padding: 8px;
   margin-bottom: 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .widgets-item:hover {
-  background: #f0f2f5;
+  background: var(--bg-secondary);
+  transform: translateX(2px);
 }
 
 /* ============================================ */
 /* СООБЩЕНИЯ */
 /* ============================================ */
-
 .send-message, .create-post, .add-friend {
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  transition: background-color var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 .send-message input,
@@ -394,18 +495,21 @@ main {
 .add-friend input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: 14px;
   font-family: inherit;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
 .send-message input:focus,
 .create-post textarea:focus,
 .add-friend input:focus {
   outline: none;
-  border-color: #1877f2;
-  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.2);
 }
 
 .message-tabs {
@@ -417,44 +521,45 @@ main {
 /* ============================================ */
 /* ПРОФИЛЬ */
 /* ============================================ */
-
 .profile-info {
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 16px;
+  transition: background-color var(--transition-smooth);
 }
 
 .profile-info h2 {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 16px;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 .profile-info p {
   font-size: 14px;
   margin-bottom: 8px;
-  color: #65676b;
+  color: var(--text-secondary);
 }
 
 .profile-info p strong {
-  color: #050505;
+  color: var(--text-primary);
 }
 
 .password-change {
-  background: #ffffff;
+  background: var(--bg-primary);
   padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-smooth);
 }
 
 .password-change h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 16px;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 .password-change form {
@@ -465,61 +570,65 @@ main {
 
 .password-change input {
   padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: 14px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
 .password-change input:focus {
   outline: none;
-  border-color: #1877f2;
-  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.2);
 }
 
 /* ============================================ */
 /* УВЕДОМЛЕНИЯ */
 /* ============================================ */
-
 .error {
-  color: #fa3e3e;
+  color: var(--danger);
   margin-top: 12px;
   padding: 12px;
-  background: #ffeaea;
-  border-radius: 6px;
+  background: rgba(250, 62, 62, 0.1);
+  border-radius: var(--radius-sm);
   font-size: 14px;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
 .success {
-  color: #31a24c;
+  color: var(--success);
   margin-top: 12px;
   padding: 12px;
-  background: #eafaf1;
-  border-radius: 6px;
+  background: rgba(49, 162, 76, 0.1);
+  border-radius: var(--radius-sm);
   font-size: 14px;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
 /* ============================================ */
-/* WELCOME СЕКЦИЯ (для index.html) */
+/* WELCOME СЕКЦИЯ */
 /* ============================================ */
-
 .welcome {
   text-align: center;
   padding: 50px 20px;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-smooth);
 }
 
 .welcome h2 {
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 16px;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 .welcome p {
   font-size: 16px;
-  color: #65676b;
+  color: var(--text-secondary);
   margin-bottom: 20px;
 }
 
@@ -535,27 +644,26 @@ main {
 .welcome ul li {
   padding: 10px;
   font-size: 15px;
-  color: #050505;
+  color: var(--text-primary);
 }
 
 /* ============================================ */
 /* FOOTER */
 /* ============================================ */
-
 footer {
-  background: #ffffff;
-  color: #65676b;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
   text-align: center;
   padding: 20px;
   margin-top: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
 /* ============================================ */
-/* АДАПТИВНОСТЬ */
+/* АДАПТИВНОСТЬ (СОХРАНЕНА С ПЛАВНЫМИ ПЕРЕХОДАМИ) */
 /* ============================================ */
-
 @media (max-width: 900px) {
   .app-container {
     grid-template-columns: 1fr;
