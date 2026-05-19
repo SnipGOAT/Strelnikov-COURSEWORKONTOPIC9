@@ -1,4 +1,5 @@
 """Модели данных для социальной сети"""
+from __future__ import annotations
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -52,11 +53,12 @@ class PasswordChange(BaseModel):
 # ОРИГИНАЛЬНЫЕ КЛАССЫ (адаптированные для веба)
 # ==============================================================================
 
+
 class Content:
     """Базовый класс для контента"""
     def __init__(self, text: str, author_id: str):
         self._id = str(uuid.uuid4())
-        self._text = text
+        self._text = text  # Приватный атрибут
         self._author_id = author_id
         self._timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -72,6 +74,11 @@ class Content:
     def timestamp(self):
         return self._timestamp
 
+    @property
+    def text(self):
+        """Публичный доступ к тексту контента"""
+        return self._text
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self._id,
@@ -81,11 +88,11 @@ class Content:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Content':  # ✅ ИСПРАВЛЕНО: добавлено 'data:'
+    def from_dict(cls, data: Dict[str, Any]) -> 'Content':
         content = cls(data['text'], data['author_id'])
         content._id = data['id']
         content._timestamp = data['timestamp']
-        return content
+        return content   
 
 
 class Post(Content):

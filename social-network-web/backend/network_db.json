@@ -1,0 +1,28 @@
+[
+    {
+        "id": "c7b60271-47a2-42d2-9ff2-23b59d417309",
+        "username": "SnipGOAT",
+        "password": "Strela@1512",
+        "friends_ids": [],
+        "posts": [
+            {
+                "id": "b1b13e5c-509a-4f9a-93cd-371cb03fa6d0",
+                "text": "re",
+                "author_id": "c7b60271-47a2-42d2-9ff2-23b59d417309",
+                "timestamp": "2026-05-19 17:36:31",
+                "type": "Post",
+                "likes": 0
+            },
+            {
+                "id": "44a39406-db00-46b2-aaf3-035e22e245f9",
+                "text": "re",
+                "author_id": "c7b60271-47a2-42d2-9ff2-23b59d417309",
+                "timestamp": "2026-05-19 17:42:13",
+                "type": "Post",
+                "likes": 0
+            }
+        ],
+        "inbox": [],
+        "outbox": []
+    }
+]
