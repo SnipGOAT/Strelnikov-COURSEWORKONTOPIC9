@@ -1,68 +1,63 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Социальная сеть MAX</title>
-    <link rel="stylesheet" href="css/style.css?v=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAX</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Социальная сеть MAX</h1>
-            <nav id="nav-auth">
-                <a href="login.html">Войти</a>
-                <a href="register.html">Регистрация</a>
-            </nav>
-            <nav id="nav-user" style="display: none;">
-                <span id="user-name"></span>
-                <a href="dashboard.html">Профиль</a>
-                <button onclick="logout()">Выйти</button>
-            </nav>
-        </header>
+  <header>
+    <h1>MAX</h1>
+    <nav>
+      <a href="login.html">Войти</a>
+      <a href="register.html">Регистрация</a>
+      <button class="theme-toggle" onclick="toggleTheme()">Смена темы</button>
+    </nav>
+  </header>
 
-        <main>
-    <section class="welcome">
-        <div class="welcome-banner">
-            <h2>Добро пожаловать!</h2>
-            <p class="subtitle">Социальная сеть с полным функционалом</p>
-        </div>
-        
-        <div class="features">
-            <div class="feature-card">
-                <span class="feature-icon">🔐</span>
-                <h3>Безопасность</h3>
-                <p>Надёжная защита данных</p>
-            </div>
-            <div class="feature-card">
-                <span class="feature-icon">👥</span>
-                <h3>Друзья</h3>
-                <p>Общение с близкими</p>
-            </div>
-            <div class="feature-card">
-                <span class="feature-icon">📝</span>
-                <h3>Публикации</h3>
-                <p>Делитесь моментами</p>
-            </div>
-            <div class="feature-card">
-                <span class="feature-icon">💬</span>
-                <h3>Сообщения</h3>
-                <p>Личная переписка</p>
-            </div>
-        </div>
-        
-        <div class="buttons">
-            <a href="register.html" class="btn btn-primary">Создать аккаунт</a>
-            <a href="login.html" class="btn btn-secondary">Войти</a>
-        </div>
-    </section>
-</main>
+  <main class="container">
+    <div class="welcome">
+      <h2>Добро пожаловать в MAX</h2>
+      <p>Место, где общаются, делятся моментами и находят друзей.</p>
 
-        <footer>
-            <p>Добро пожаловать в народную и безопасную соцсеть!</p>
-            <p>Стрельников Максим, ИСТ04/25б</p>
-        </footer>
+      <div class="features">
+        <div class="feature-card">
+          <span class="feature-icon"></span>
+          <h3>Лента новостей</h3>
+          <p>Смотрите, что публикуют ваши друзья и интересные люди.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon"></span>
+          <h3>Мессенджер</h3>
+          <p>Общайтесь в реальном времени с кем угодно.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon"></span>
+          <h3>Группы</h3>
+          <p>Вступайте в сообщества по интересам или создавайте свои.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon"></span>
+          <h3>Приватность</h3>
+          <p>Полный контроль над вашими данными и публикациями.</p>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <a href="register.html" class="btn btn-primary">Присоединиться</a>
+        <a href="login.html" class="btn btn-secondary">Уже есть аккаунт</a>
+      </div>
     </div>
-    <script src="js/app.js"></script>
+  </main>
+
+  <footer>© 2026 MAX. Все права защищены.</footer>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      body.dataset.theme = body.dataset.theme === 'dark' ? 'light' : 'dark';
+    }
+  </script>
 </body>
 </html>
