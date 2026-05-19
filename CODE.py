@@ -11,6 +11,7 @@ from typing import List, Optional, Dict, Any
 
 
 class Content(ABC):
+    """Абстрактный базовый класс для любого контента в социальной сети. Реализует принцип наследования и полиморфизма."""
     def __init__(self, text: str, author_id: str):
         self._id = str(uuid.uuid4())
         self._text = text
@@ -18,13 +19,16 @@ class Content(ABC):
         self._timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     @abstractmethod
+    """Метод для отображения контента (полиморфизм)."""
     def render(self) -> str: pass
 
     @abstractmethod
+    """Метод для сериализации объекта в словарь."""
     def to_dict(self) -> Dict[str, Any]: pass
 
     @classmethod
     @abstractmethod
+    """Метод для десериализации объекта из словаря."""
     def from_dict(cls, data: Dict[str, Any]) -> 'Content': pass
 
     @property
@@ -38,6 +42,7 @@ class Content(ABC):
 
 
 class Post(Content):
+    """Класс Публикации (лента новостей)."""
     def __init__(self, text: str, author_id: str, likes: int = 0):
         super().__init__(text, author_id)
         self._likes = likes
@@ -86,6 +91,7 @@ class Post(Content):
 
 
 class Message(Content):
+    """Класс Личного сообщения."""
     def __init__(self, text: str, author_id: str, receiver_id: str):
         super().__init__(text, author_id)
         self._receiver_id = receiver_id
@@ -124,6 +130,7 @@ class Message(Content):
 
 
 class User:
+    """Класс Пользователя. Реализует принцип инкапсуляции (скрытие пароля и внутренних списков)."""
     def __init__(self, username: str, password: str):
         self._id = str(uuid.uuid4())
         self._username = username
@@ -139,6 +146,7 @@ class User:
     def username(self): return self._username
 
     def check_password(self, password: str) -> bool:
+        """Проверка пароля без его возврата."""
         return self.__password == password
 
     def change_password(self, old_pass: str, new_pass: str) -> bool:
@@ -213,6 +221,7 @@ class User:
 
 
 class SocialNetwork:
+    """Класс Пользователя. Реализует принцип инкапсуляции (скрытие пароля и внутренних списков)."""
     DB_FILE = "network_db.json"
 
     def __init__(self):
