@@ -91,10 +91,8 @@
 
     <script src="js/app.js"></script>
     <script>
-        // Функция переключения темы (можно вынести в app.js при необходимости)
         function toggleTheme() {
-            const body = document.body;
-            body.dataset.theme = body.dataset.theme === 'dark' ? 'light' : 'dark';
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
         }
     </script>
 </body>
