@@ -224,4 +224,4 @@ def user_profile(user_id):
     return render_template('user_profile.html', profile=profile)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=False, port=5000)
