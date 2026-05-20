@@ -1,17 +1,12 @@
-/* ====== Глобальные переменные ====== */
+/* ====== Анимированные градиенты и неоновая тема ====== */
 :root {
-    --primary: #4f6ef7;          /* основной акцентный синий */
-    --primary-hover: #3b54d4;
-    --accent: #ff7b42;          /* тёплый акцент (как на max.ru) */
-    --bg: #f4f6fb;
-    --surface: #ffffff;
-    --text: #1e2a3a;
-    --text-light: #6c7a8d;
-    --border: #e1e5f0;
-    --shadow: 0 4px 12px rgba(0,0,0,0.05);
-    --shadow-hover: 0 8px 20px rgba(0,0,0,0.1);
-    --radius: 16px;
-    --transition: 0.25s ease;
+    --neon-blue: #4facfe;
+    --neon-purple: #a855f7;
+    --neon-pink: #f472b6;
+    --neon-cyan: #22d3ee;
+    --dark-bg: #0b0b1a;
+    --card-bg: rgba(20, 20, 40, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -21,293 +16,374 @@
 }
 
 body {
-    font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: var(--dark-bg);
+    color: #e2e8f0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    /* Переливающийся фон */
+    background: linear-gradient(-45deg, #0f0c29, #1a1a3e, #24243e, #0f0c29);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* ====== Навигация ====== */
 .navbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    background: rgba(10, 10, 30, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 .nav-container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 24px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 64px;
+    justify-content: space-between;  /* три зоны: левая, центр (лого), правая */
+    height: 70px;
+    position: relative;
 }
 
+/* Логотип по центру */
 .logo {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--primary);
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-decoration: none;
+    animation: logoPulse 3s infinite alternate;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@keyframes logoPulse {
+    0% { filter: drop-shadow(0 0 6px var(--neon-cyan)); }
+    100% { filter: drop-shadow(0 0 14px var(--neon-blue)); }
+}
+
+/* Левая и правая группы кнопок */
+.nav-left, .nav-right {
     display: flex;
+    gap: 12px;
     align-items: center;
-    gap: 10px;
-    transition: color var(--transition);
 }
 
-.logo:hover {
-    color: var(--primary-hover);
-}
-
-.nav-links {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: var(--text-light);
-    font-weight: 500;
-    font-size: 1rem;
-    display: flex;
+/* ----- Единые стили для всех навигационных ссылок ----- */
+.nav-left a, .nav-right a {
+    position: relative;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    transition: all var(--transition);
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.4s ease;
+    overflow: hidden;
+    z-index: 1;
 }
 
-.nav-links a:hover {
-    color: var(--primary);
-    background: rgba(79,110,247,0.08);
+/* Градиентная подложка (скрыта по умолчанию) */
+.nav-left a::before, .nav-right a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: -1;
+    border-radius: 40px;
 }
 
-.btn-logout {
-    background: #fff0f0;
-    color: #e04f4f !important;
+/* Hover: включаем подложку и добавляем свечение */
+.nav-left a:hover, .nav-right a:hover {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.6), 0 0 40px rgba(168, 85, 247, 0.4);
+    transform: translateY(-2px);
 }
 
-.btn-logout:hover {
-    background: #ffe5e5 !important;
+.nav-left a:hover::before, .nav-right a:hover::before {
+    opacity: 1;
+}
+
+/* Особый стиль для кнопки "Выйти" */
+.nav-left a.btn-logout {
+    background: rgba(255, 80, 80, 0.15);
+    border-color: rgba(255, 100, 100, 0.3);
+    color: #ff9999;
+}
+
+.nav-left a.btn-logout:hover {
+    background: rgba(255, 80, 80, 0.35);
+    color: #ffffff;
+    box-shadow: 0 0 25px rgba(255, 80, 80, 0.7);
+    border-color: transparent;
+}
+
+/* Активная ссылка (опционально) */
+.nav-left a.active, .nav-right a.active {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    color: white;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.5);
+    border-color: transparent;
 }
 
 /* ====== Основной контейнер ====== */
 .main-container {
-    max-width: 1100px;
+    max-width: 1200px;
     width: 100%;
-    margin: 32px auto;
-    padding: 0 20px;
+    margin: 40px auto;
+    padding: 0 24px;
     flex: 1;
 }
 
-/* ====== Карточки (посты, сообщения, профили) ====== */
-.card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
-    transition: box-shadow var(--transition);
-    border: 1px solid var(--border);
+/* ====== Карточки (посты, сообщения) ====== */
+.card, .post, .message {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 
-.card:hover {
-    box-shadow: var(--shadow-hover);
+.card::after, .post::after, .message::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(79, 172, 254, 0.15), transparent, rgba(168, 85, 247, 0.15), transparent);
+    animation: rotateGlow 8s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotateGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.card:hover, .post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(79, 172, 254, 0.25);
 }
 
 .post-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
+    gap: 14px;
+    margin-bottom: 18px;
 }
 
 .avatar {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--primary), #8b9cf7);
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
     font-weight: bold;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    color: white;
+    box-shadow: 0 0 15px var(--neon-blue);
 }
 
 .post-author {
-    font-weight: 600;
-    color: var(--text);
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, #e0e7ff, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .post-time {
-    color: var(--text-light);
+    color: #94a3b8;
     font-size: 0.85rem;
 }
 
 .post-text {
-    font-size: 1.05rem;
-    margin-bottom: 16px;
-    line-height: 1.5;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    color: #e2e8f0;
 }
 
-.post-actions {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-/* ====== Кнопки ====== */
-.btn {
+/* ====== Кнопки (общие) ====== */
+.btn, button, .btn-primary, .btn-accent, .btn-like {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 18px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 12px;
-    font-weight: 600;
+    border-radius: 30px;
+    font-weight: 700;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all var(--transition);
+    transition: all 0.3s;
     text-decoration: none;
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-}
-
-.btn:hover {
-    background: #edf0f8;
-    transform: translateY(-1px);
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-.btn-primary:hover {
-    background: var(--primary-hover);
-}
-
-.btn-accent {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
-}
-
-.btn-accent:hover {
-    background: #e96b32;
+    background: rgba(255,255,255,0.08);
+    color: #ddd;
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(5px);
 }
 
 .btn-danger {
-    background: #fff5f5;
-    color: #d93a3a;
-    border-color: #fcc;
+    background: rgba(255, 80, 80, 0.2);
+    border: 1px solid #ff4d4d;
+    color: #ff9999;
+}
+.btn-danger:hover {
+    background: rgba(255, 80, 80, 0.4);
+    box-shadow: 0 0 15px #ff4d4d;
 }
 
-.btn-danger:hover {
-    background: #ffeaea;
+.btn:hover, button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+    border: none;
+    color: white;
+    text-shadow: 0 1px 2px black;
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+    border: none;
+    color: white;
+    text-shadow: 0 1px 2px black;
 }
 
 .btn-like {
-    background: #fff0f0;
-    color: #e04f4f;
-    border-color: #ffd1d1;
+    background: rgba(255, 80, 120, 0.2);
+    border: 1px solid var(--neon-pink);
+    color: #ffb3c6;
 }
 
 .btn-like:hover {
-    background: #ffe5e5;
+    background: rgba(255, 80, 120, 0.4);
+    box-shadow: 0 0 15px var(--neon-pink);
 }
 
 /* ====== Формы ====== */
-.form-group {
-    margin-bottom: 20px;
-}
-
-input[type="text"],
-input[type="password"],
-textarea {
+input, textarea {
     width: 100%;
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    padding: 14px 18px;
+    background: rgba(10, 10, 30, 0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    color: white;
     font-size: 1rem;
-    background: #fafbfd;
-    transition: border-color var(--transition), box-shadow var(--transition);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s;
 }
 
-input:focus,
-textarea:focus {
+input:focus, textarea:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(79,110,247,0.15);
-}
-
-textarea {
-    resize: vertical;
-    min-height: 90px;
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(79, 172, 254, 0.5);
 }
 
 /* ====== Сообщения ====== */
-.message-card {
-    border-left: 4px solid var(--primary);
+.message.incoming {
+    border-left: 4px solid var(--neon-cyan);
 }
 
-.message-card.incoming {
-    border-left-color: var(--accent);
+.message.outgoing {
+    border-left: 4px solid var(--neon-pink);
 }
 
 .message-sender {
-    font-weight: 600;
-    margin-bottom: 6px;
+    font-weight: 700;
+    color: var(--neon-cyan);
 }
 
 /* ====== Профиль ====== */
 .profile-header {
     display: flex;
     align-items: center;
-    gap: 24px;
-    margin-bottom: 32px;
+    gap: 28px;
+    margin-bottom: 40px;
 }
 
 .profile-avatar {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #4f6ef7, #9b8afb);
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5rem;
+    font-size: 3rem;
     color: white;
+    box-shadow: 0 0 30px var(--neon-purple);
 }
 
-/* ====== Сетка друзей ====== */
+/* ====== Друзья ====== */
 .friend-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
 }
 
 .friend-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--surface);
-    padding: 16px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    transition: 0.3s;
+}
+
+.friend-card:hover {
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
+    transform: scale(1.02);
+}
+
+/* ====== Footer ====== */
+.footer {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+    border-top: 1px solid var(--glass-border);
+    margin-top: auto;
+    backdrop-filter: blur(5px);
 }
 
 /* ====== Адаптивность ====== */
@@ -315,24 +391,83 @@ textarea {
     .nav-container {
         flex-direction: column;
         height: auto;
-        padding: 12px 20px;
+        padding: 15px;
+        gap: 12px;
     }
-    .nav-links {
+    .logo {
+        position: static;
+        transform: none;
+        margin-bottom: 8px;
+    }
+    .nav-left, .nav-right {
         flex-wrap: wrap;
         justify-content: center;
-        margin-top: 10px;
     }
     .main-container {
         margin-top: 20px;
     }
 }
 
-/* ====== Футер ====== */
-.footer {
+/* ====== Лендинг (приветственная страница) ====== */
+.landing {
     text-align: center;
-    padding: 20px;
-    color: var(--text-light);
-    font-size: 0.9rem;
-    border-top: 1px solid var(--border);
-    margin-top: auto;
+    padding: 80px 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.landing h1 {
+    font-size: 2.8rem;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.landing-text {
+    font-size: 1.2rem;
+    color: #b9c7dd;
+    margin-bottom: 40px;
+    line-height: 1.7;
+}
+
+.landing-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.landing-buttons .btn {
+    padding: 14px 32px;
+    font-size: 1.1rem;
+}
+
+/* Бейдж непрочитанных сообщений */
+.badge {
+    background: var(--neon-pink);
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: 4px;
+    line-height: 1;
+}
+
+/* Сообщения: непрочитанные и прочитанные */
+.message.unread {
+    border-left: 4px solid var(--neon-pink);
+    background: rgba(255, 80, 120, 0.08);
+}
+
+.message.read {
+    border-left: 4px solid var(--neon-cyan);
+}
+
+.read-badge {
+    color: var(--neon-cyan);
+    font-weight: 600;
+    margin-left: 10px;
 }

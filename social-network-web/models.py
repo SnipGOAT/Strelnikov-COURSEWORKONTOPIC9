@@ -40,19 +40,30 @@ class Content(ABC):
 
 
 class Post(Content):
-    def __init__(self, text: str, author_id: str, likes: int = 0):
+    def __init__(self, text: str, author_id: str, liked_by: List[str] = None):
         super().__init__(text, author_id)
-        self._likes = likes
+        self._liked_by = liked_by if liked_by is not None else []
 
     def render(self) -> str:
-        return f"[ПУБЛИКАЦИЯ] ({self._timestamp})\nТекст: {self._text}\nЛайки: {self._likes}"
+        return f"[ПУБЛИКАЦИЯ] ({self._timestamp})\nТекст: {self._text}\nЛайки: {len(self._liked_by)}"
 
-    def like(self):
-        self._likes += 1
+    def toggle_like(self, user_id: str):
+        """Добавляет или убирает лайк пользователя. Возвращает (количество лайков, True если теперь лайкнуто)."""
+        if user_id in self._liked_by:
+            self._liked_by.remove(user_id)
+            liked = False
+        else:
+            self._liked_by.append(user_id)
+            liked = True
+        return len(self._liked_by), liked
 
     @property
     def likes(self):
-        return self._likes
+        return len(self._liked_by)
+
+    @property
+    def liked_by_ids(self):
+        return self._liked_by.copy()
 
     @property
     def text(self):
@@ -65,12 +76,16 @@ class Post(Content):
             "text": self._text,
             "author_id": self._author_id,
             "timestamp": self._timestamp,
-            "likes": self._likes
+            "liked_by": self._liked_by
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Post':
-        post = cls(data['text'], data['author_id'], data.get('likes', 0))
+        # поддержка старых данных, где было поле 'likes'
+        liked_by = data.get('liked_by', [])
+        if not liked_by and 'likes' in data:
+            liked_by = []
+        post = cls(data['text'], data['author_id'], liked_by)
         post._id = data['id']
         post._timestamp = data['timestamp']
         return post
@@ -90,16 +105,16 @@ class Message(Content):
         self._is_read = True
 
     @property
+    def is_read(self):
+        return self._is_read
+
+    @property
     def receiver_id(self):
         return self._receiver_id
 
     @property
     def text(self):
         return self._text
-
-    @property
-    def is_read(self):
-        return self._is_read
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -173,6 +188,13 @@ class User:
                 return p
         return None
 
+    def delete_post(self, post_id: str) -> bool:
+        for i, post in enumerate(self._posts):
+            if post.id == post_id:
+                del self._posts[i]
+                return True
+        return False
+
     def receive_message(self, message: Message):
         self._inbox.append(message)
 
@@ -180,12 +202,13 @@ class User:
         self._outbox.append(message)
 
     def get_inbox(self) -> List[Message]:
-        for msg in self._inbox:
-            msg.mark_as_read()
         return self._inbox.copy()
 
     def get_outbox(self) -> List[Message]:
         return self._outbox.copy()
+
+    def get_unread_messages_count(self) -> int:
+        return sum(1 for msg in self._inbox if not msg.is_read)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -221,16 +244,13 @@ class SocialNetwork:
 
     def _load_db(self):
         if not os.path.exists(self.DB_FILE):
-            print("[СИСТЕМА] База данных не найдена. Создаётся новая.")
             return
         try:
             with open(self.DB_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            temp = {}
             for u_data in data:
                 user = User.from_dict(u_data)
-                temp[user.id] = user
-            self._users = temp
+                self._users[user.id] = user
         except Exception as e:
             print(f"[ОШИБКА] {e}")
 

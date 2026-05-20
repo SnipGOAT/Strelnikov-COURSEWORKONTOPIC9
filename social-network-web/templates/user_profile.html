@@ -2,15 +2,23 @@
 {% block content %}
 <h2>Профиль: {{ profile.username }}</h2>
 <p>Всего публикаций: {{ profile.get_posts()|length }}</p>
+
 <h3>Публикации</h3>
 {% for post in profile.get_posts()|reverse %}
     <div class="post">
         <p>{{ post.text }}</p>
         <small>{{ post.timestamp }} | ❤️ {{ post.likes }}</small>
-        <form action="/post/like/{{ post.id }}" method="post" style="display:inline">
-            <button type="submit">👍 Лайк</button>
-        </form>
-        <a href="/post/{{ post.id }}">🔗 Публичная ссылка</a>
+        <div class="post-actions">
+            <form action="/post/like/{{ post.id }}" method="post" style="display:inline">
+                <button type="submit" class="btn btn-like">👍 Лайк</button>
+            </form>
+            <a href="/post/{{ post.id }}" class="btn">🔗 Ссылка</a>
+            {% if user and user.id == profile.id %}
+            <form action="/post/delete/{{ post.id }}" method="post" style="display:inline" onsubmit="return confirm('Удалить пост?');">
+                <button type="submit" class="btn btn-danger">🗑 Удалить</button>
+            </form>
+            {% endif %}
+        </div>
     </div>
 {% endfor %}
 {% endblock %}

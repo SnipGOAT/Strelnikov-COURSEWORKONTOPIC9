@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Публикации</h2>
+
+<div class="card">
+    <h3>Новая публикация</h3>
+    <form action="/post/create" method="post">
+        <textarea name="text" rows="3" placeholder="Что у вас нового?" required></textarea>
+        <button type="submit" class="btn btn-primary">Опубликовать</button>
+    </form>
+</div>
+
+<h3>Все публикации</h3>
+{% if feed %}
+    {% for item in feed %}
+        <div class="post">
+            <div class="post-header">
+                <div class="avatar">{{ item.author[0] }}</div>
+                <div>
+                    <div class="post-author">{{ item.author }}</div>
+                    <div class="post-time">{{ item.post.timestamp }}</div>
+                </div>
+            </div>
+            <p class="post-text">{{ item.post.text }}</p>
+            <div class="post-actions">
+                <small>❤️ {{ item.post.likes }}</small>
+                <form action="/post/like/{{ item.post.id }}" method="post" style="display:inline">
+                    <button type="submit" class="btn btn-like">
+                        {% if item.user_liked %}👎 Убрать{% else %}👍 Лайк{% endif %}
+                    </button>
+                </form>
+                <a href="/post/{{ item.post.id }}" class="btn">🔗 Ссылка</a>
+                {% if user and user.id == item.author_id %}
+                <form action="/post/delete/{{ item.post.id }}" method="post" style="display:inline" onsubmit="return confirm('Удалить пост?');">
+                    <button type="submit" class="btn btn-danger">🗑 Удалить</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Публикаций пока нет. Будьте первым!</p>
+{% endif %}
+{% endblock %}

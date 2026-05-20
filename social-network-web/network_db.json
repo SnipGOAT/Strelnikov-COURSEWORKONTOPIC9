@@ -1,0 +1,73 @@
+[
+    {
+        "id": "d797f3e9-85a2-4878-8958-55ed2e23eb01",
+        "username": "SnipGOAT",
+        "password": "Strela@1512",
+        "friends_ids": [
+            "c03a232e-9b67-48d2-89d6-7c3d82e1c866"
+        ],
+        "posts": [
+            {
+                "type": "Post",
+                "id": "c4d01d15-c8e9-4291-aae5-a9696db11479",
+                "text": "Привет",
+                "author_id": "d797f3e9-85a2-4878-8958-55ed2e23eb01",
+                "timestamp": "2026-05-20 16:45:31",
+                "liked_by": []
+            }
+        ],
+        "inbox": [
+            {
+                "type": "Message",
+                "id": "e9ab2f13-e719-4f2b-be40-7e18efabfd07",
+                "text": "ку",
+                "author_id": "c03a232e-9b67-48d2-89d6-7c3d82e1c866",
+                "receiver_id": "d797f3e9-85a2-4878-8958-55ed2e23eb01",
+                "timestamp": "2026-05-20 16:46:43",
+                "is_read": true
+            }
+        ],
+        "outbox": [
+            {
+                "type": "Message",
+                "id": "aa5d472c-7a8b-4090-81bd-65075634083e",
+                "text": "уц",
+                "author_id": "d797f3e9-85a2-4878-8958-55ed2e23eb01",
+                "receiver_id": "c03a232e-9b67-48d2-89d6-7c3d82e1c866",
+                "timestamp": "2026-05-20 16:47:01",
+                "is_read": false
+            }
+        ]
+    },
+    {
+        "id": "c03a232e-9b67-48d2-89d6-7c3d82e1c866",
+        "username": "SnipGOAT2",
+        "password": "Strela@1512",
+        "friends_ids": [
+            "d797f3e9-85a2-4878-8958-55ed2e23eb01"
+        ],
+        "posts": [],
+        "inbox": [
+            {
+                "type": "Message",
+                "id": "aa5d472c-7a8b-4090-81bd-65075634083e",
+                "text": "уц",
+                "author_id": "d797f3e9-85a2-4878-8958-55ed2e23eb01",
+                "receiver_id": "c03a232e-9b67-48d2-89d6-7c3d82e1c866",
+                "timestamp": "2026-05-20 16:47:01",
+                "is_read": true
+            }
+        ],
+        "outbox": [
+            {
+                "type": "Message",
+                "id": "e9ab2f13-e719-4f2b-be40-7e18efabfd07",
+                "text": "ку",
+                "author_id": "c03a232e-9b67-48d2-89d6-7c3d82e1c866",
+                "receiver_id": "d797f3e9-85a2-4878-8958-55ed2e23eb01",
+                "timestamp": "2026-05-20 16:46:43",
+                "is_read": true
+            }
+        ]
+    }
+]

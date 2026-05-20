@@ -6,15 +6,22 @@
 <form action="/messages/send" method="post">
     <input type="text" name="username" placeholder="Кому (логин)" required>
     <textarea name="text" placeholder="Текст сообщения" required></textarea>
-    <button type="submit">Отправить</button>
+    <button type="submit" class="btn btn-primary">Отправить</button>
 </form>
 
 <h3>Входящие</h3>
 {% for m in inbox %}
-    <div class="message">
+    <div class="message {% if m.message.is_read %}read{% else %}unread{% endif %}">
         <strong>От: {{ m.sender_name }}</strong>
         <p>{{ m.message.text }}</p>
-        <small>{{ m.message.timestamp }} {% if m.message.is_read %}(прочитано){% endif %}</small>
+        <small>{{ m.message.timestamp }}</small>
+        {% if not m.message.is_read %}
+            <form action="/messages/read/{{ m.message.id }}" method="post" style="display:inline">
+                <button type="submit" class="btn btn-accent">Прочитано</button>
+            </form>
+        {% else %}
+            <span class="read-badge">✓ Прочитано</span>
+        {% endif %}
     </div>
 {% else %}
     <p>Нет входящих сообщений.</p>
@@ -22,7 +29,7 @@
 
 <h3>Исходящие</h3>
 {% for m in outbox %}
-    <div class="message">
+    <div class="message outgoing">
         <strong>Кому: {{ m.receiver_name }}</strong>
         <p>{{ m.message.text }}</p>
         <small>{{ m.message.timestamp }}</small>
