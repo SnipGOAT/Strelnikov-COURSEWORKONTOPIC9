@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Добро пожаловать, {{ user.username }}!</h2>
+
+<h3>Новая публикация</h3>
+<form action="/post/create" method="post">
+    <textarea name="text" rows="3" placeholder="Что у вас нового?"></textarea>
+    <button type="submit">Опубликовать</button>
+</form>
+
+<h3>Лента друзей</h3>
+{% if feed %}
+    {% for item in feed %}
+        <div class="post">
+            <strong>{{ item.author }}</strong>
+            <p>{{ item.post.text }}</p>
+            <small>{{ item.post.timestamp }} | ❤️ {{ item.post.likes }}</small>
+            <form action="/post/like/{{ item.post.id }}" method="post" style="display:inline">
+                <button type="submit">👍 Лайк</button>
+            </form>
+            <a href="/post/{{ item.post.id }}">🔗 Публичная ссылка</a>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Лента пока пуста. Добавьте друзей!</p>
+{% endif %}
+{% endblock %}

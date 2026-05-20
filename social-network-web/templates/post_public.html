@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Публикация</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="post">
+        <h2>Публикация пользователя {{ author_name }}</h2>
+        <p>{{ post.text }}</p>
+        <small>{{ post.timestamp }} | ❤️ {{ post.likes }}</small>
+        <form action="/post/like/{{ post.id }}" method="post">
+            <button type="submit">👍 Лайк</button>
+        </form>
+        <p><a href="/">Вернуться в сеть</a></p>
+    </div>
+</body>
+</html>

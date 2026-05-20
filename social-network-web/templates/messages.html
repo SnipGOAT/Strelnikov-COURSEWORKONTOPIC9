@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Сообщения</h2>
+
+<h3>Отправить сообщение</h3>
+<form action="/messages/send" method="post">
+    <input type="text" name="username" placeholder="Кому (логин)" required>
+    <textarea name="text" placeholder="Текст сообщения" required></textarea>
+    <button type="submit">Отправить</button>
+</form>
+
+<h3>Входящие</h3>
+{% for m in inbox %}
+    <div class="message">
+        <strong>От: {{ m.sender_name }}</strong>
+        <p>{{ m.message.text }}</p>
+        <small>{{ m.message.timestamp }} {% if m.message.is_read %}(прочитано){% endif %}</small>
+    </div>
+{% else %}
+    <p>Нет входящих сообщений.</p>
+{% endfor %}
+
+<h3>Исходящие</h3>
+{% for m in outbox %}
+    <div class="message">
+        <strong>Кому: {{ m.receiver_name }}</strong>
+        <p>{{ m.message.text }}</p>
+        <small>{{ m.message.timestamp }}</small>
+    </div>
+{% else %}
+    <p>Нет исходящих сообщений.</p>
+{% endfor %}
+{% endblock %}
