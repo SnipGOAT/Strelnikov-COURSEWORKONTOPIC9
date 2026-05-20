@@ -1,6 +1,338 @@
-body { font-family: Arial; margin: 20px; background: #f9f9f9; }
-nav { margin-bottom: 20px; background: #eee; padding: 8px; }
-.post, .message { background: white; border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 5px; }
-.error { color: red; }
-button { cursor: pointer; padding: 5px 10px; }
-textarea, input { padding: 5px; margin: 3px; }
+/* ====== Глобальные переменные ====== */
+:root {
+    --primary: #4f6ef7;          /* основной акцентный синий */
+    --primary-hover: #3b54d4;
+    --accent: #ff7b42;          /* тёплый акцент (как на max.ru) */
+    --bg: #f4f6fb;
+    --surface: #ffffff;
+    --text: #1e2a3a;
+    --text-light: #6c7a8d;
+    --border: #e1e5f0;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-hover: 0 8px 20px rgba(0,0,0,0.1);
+    --radius: 16px;
+    --transition: 0.25s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ====== Навигация ====== */
+.navbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.nav-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+}
+
+.logo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: color var(--transition);
+}
+
+.logo:hover {
+    color: var(--primary-hover);
+}
+
+.nav-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-light);
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: all var(--transition);
+}
+
+.nav-links a:hover {
+    color: var(--primary);
+    background: rgba(79,110,247,0.08);
+}
+
+.btn-logout {
+    background: #fff0f0;
+    color: #e04f4f !important;
+}
+
+.btn-logout:hover {
+    background: #ffe5e5 !important;
+}
+
+/* ====== Основной контейнер ====== */
+.main-container {
+    max-width: 1100px;
+    width: 100%;
+    margin: 32px auto;
+    padding: 0 20px;
+    flex: 1;
+}
+
+/* ====== Карточки (посты, сообщения, профили) ====== */
+.card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    transition: box-shadow var(--transition);
+    border: 1px solid var(--border);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--primary), #8b9cf7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.post-author {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.post-time {
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.post-text {
+    font-size: 1.05rem;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.post-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ====== Кнопки ====== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    text-decoration: none;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn:hover {
+    background: #edf0f8;
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-accent {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.btn-accent:hover {
+    background: #e96b32;
+}
+
+.btn-danger {
+    background: #fff5f5;
+    color: #d93a3a;
+    border-color: #fcc;
+}
+
+.btn-danger:hover {
+    background: #ffeaea;
+}
+
+.btn-like {
+    background: #fff0f0;
+    color: #e04f4f;
+    border-color: #ffd1d1;
+}
+
+.btn-like:hover {
+    background: #ffe5e5;
+}
+
+/* ====== Формы ====== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #fafbfd;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,110,247,0.15);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* ====== Сообщения ====== */
+.message-card {
+    border-left: 4px solid var(--primary);
+}
+
+.message-card.incoming {
+    border-left-color: var(--accent);
+}
+
+.message-sender {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* ====== Профиль ====== */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #4f6ef7, #9b8afb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+}
+
+/* ====== Сетка друзей ====== */
+.friend-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.friend-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+/* ====== Адаптивность ====== */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        height: auto;
+        padding: 12px 20px;
+    }
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    .main-container {
+        margin-top: 20px;
+    }
+}
+
+/* ====== Футер ====== */
+.footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+}
