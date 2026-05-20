@@ -312,4 +312,8 @@ async def delete_post(
 # ==============================================================================
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import uvicorn
+    import os
+    # Render задаёт порт через переменную окружения $PORT
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
