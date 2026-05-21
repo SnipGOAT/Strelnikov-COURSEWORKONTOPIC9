@@ -1,9 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from models import SocialNetwork, Post, Message
 import os
+import uuid
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from werkzeug.utils import secure_filename
+from models import SocialNetwork, Post, Message
+from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
+
 network = SocialNetwork()
 
 def current_user():
@@ -27,7 +37,7 @@ def inject_user():
         unread_count = user.get_unread_messages_count()
     return dict(user=user, unread_count=unread_count)
 
-# Главная
+# ---------- Главная ----------
 @app.route('/')
 def index():
     user = current_user()
@@ -46,7 +56,7 @@ def index():
     feed.sort(key=lambda x: x['post'].timestamp, reverse=True)
     return render_template('index.html', feed=feed)
 
-# Аутентификация
+# ---------- Аутентификация ----------
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     if request.method == 'POST':
@@ -55,6 +65,7 @@ def login_page():
         user = network.login(username, password)
         if user:
             session['user_id'] = user.id
+            session.permanent = True
             return redirect(url_for('index'))
         return render_template('login.html', error='Неверные логин или пароль')
     return render_template('login.html')
@@ -69,6 +80,7 @@ def register_page():
         new_user = network.register(username, password)
         if new_user:
             session['user_id'] = new_user.id
+            session.permanent = True
             return redirect(url_for('index'))
         return render_template('register.html', error='Пользователь уже существует')
     return render_template('register.html')
@@ -78,7 +90,7 @@ def logout():
     session.pop('user_id', None)
     return redirect(url_for('index'))
 
-# Публикации
+# ---------- Публикации ----------
 @app.route('/posts')
 @login_required
 def posts_page():
@@ -133,7 +145,7 @@ def public_post(post_id):
     author_name = author.username if author else "Неизвестный"
     return render_template('post_public.html', post=post, author_name=author_name)
 
-# Друзья
+# ---------- Друзья ----------
 @app.route('/friends')
 @login_required
 def friends_page():
@@ -168,53 +180,146 @@ def remove_friend(friend_id):
     network.save_db()
     return redirect(url_for('friends_page'))
 
-# Сообщения
+# ---------- Сообщения и чат API ----------
 @app.route('/messages')
 @login_required
 def messages_page():
+    return render_template('messages.html')
+
+@app.route('/api/upload', methods=['POST'])
+@login_required
+def api_upload():
+    file = request.files.get('attachment')
+    if not file or not file.filename:
+        return jsonify({'error': 'No file'}), 400
+    original_filename = secure_filename(file.filename)
+    unique_name = f"{uuid.uuid4().hex}_{original_filename}"
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+    file.save(file_path)
+    attachment_url = f"uploads/{unique_name}"
+    return jsonify({'attachment': attachment_url})
+
+@app.route('/api/contacts')
+@login_required
+def api_contacts():
     user = current_user()
-    inbox = user.get_inbox()
-    outbox = user.get_outbox()
-    def enrich(msgs):
-        res = []
-        for m in msgs:
-            sender = network.find_user_by_id(m.author_id)
-            receiver = network.find_user_by_id(m.receiver_id)
-            res.append({
-                'message': m,
-                'sender_name': sender.username if sender else '?',
-                'receiver_name': receiver.username if receiver else '?'
+    contacts = user.get_contacts()
+    result = []
+    for c in contacts:
+        contact_user = network.find_user_by_id(c['user_id'])
+        if contact_user:
+            result.append({
+                'user_id': c['user_id'],
+                'username': contact_user.username,
+                'last_msg_time': c['last_msg_time'],
+                'unread': c['unread']
             })
-        return res
-    return render_template('messages.html', user=user,
-                           inbox=enrich(inbox), outbox=enrich(outbox))
+    return jsonify({'contacts': result})
 
-@app.route('/messages/send', methods=['POST'])
+@app.route('/api/messages/<contact_id>')
 @login_required
-def send_message():
+def api_messages(contact_id):
     user = current_user()
-    target_name = request.form.get('username', '').strip()
-    text = request.form.get('text', '').strip()
-    target = network.find_user_by_username(target_name)
-    if target and target.id != user.id and text:
-        msg = Message(text, user.id, target.id)
-        user.send_message(msg)
-        target.receive_message(msg)
-        network.save_db()
-    return redirect(url_for('messages_page'))
+    messages = user.get_conversation_with(contact_id, mark_read=True)
+    network.save_db()
+    contact_user = network.find_user_by_id(contact_id)
+    contact_name = contact_user.username if contact_user else "Unknown"
+    current_name = user.username
+    enriched = []
+    for m in messages:
+        enriched.append({
+            **m,
+            'sender_name': contact_name if m['direction'] == 'in' else current_name,
+            'receiver_name': current_name if m['direction'] == 'in' else contact_name
+        })
+    return jsonify({'messages': enriched, 'contact_name': contact_name})
 
-@app.route('/messages/read/<message_id>', methods=['POST'])
+@app.route('/api/send', methods=['POST'])
 @login_required
-def mark_message_read(message_id):
+def api_send():
     user = current_user()
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid JSON'}), 400
+    contact_id = data.get('contact_id')
+    text = data.get('text', '').strip()
+    attachment = data.get('attachment')
+
+    if not contact_id:
+        return jsonify({'error': 'Missing contact_id'}), 400
+    if not text and not attachment:
+        return jsonify({'error': 'Empty message'}), 400
+
+    target = network.find_user_by_id(contact_id)
+    if not target:
+        return jsonify({'error': 'User not found'}), 404
+
+    msg = Message(text, user.id, target.id, attachment)
+    user.send_message(msg)
+    target.receive_message(msg)
+    network.save_db()
+
+    return jsonify({
+        'success': True,
+        'message': {
+            'id': msg.id,
+            'text': msg.text,
+            'from': user.id,
+            'to': target.id,
+            'time': msg.timestamp,
+            'direction': 'out',
+            'is_read': False,
+            'attachment': msg.attachment
+        }
+    })
+
+@app.route('/api/check_new')
+@login_required
+def api_check_new():
+    user = current_user()
+    unread_count = user.get_unread_messages_count()
+    new_messages = []
     for msg in user.get_inbox():
-        if msg.id == message_id and not msg.is_read:
-            msg.mark_as_read()
-            network.save_db()
-            break
-    return redirect(url_for('messages_page'))
+        if not msg.is_read:
+            sender = network.find_user_by_id(msg.author_id)
+            new_messages.append({
+                'from_id': msg.author_id,
+                'from_name': sender.username if sender else '?',
+                'text': msg.text[:50],
+                'time': msg.timestamp
+            })
+    return jsonify({'unread_count': unread_count, 'new_messages': new_messages})
 
-# Профиль
+# Редактирование и удаление через POST с _method
+@app.route('/api/messages/<message_id>/edit', methods=['POST'])
+@login_required
+def api_edit_message(message_id):
+    if request.form.get('_method') != 'PUT':
+        return jsonify({'error': 'Method not allowed'}), 405
+    user = current_user()
+    new_text = request.form.get('text', '').strip()
+    if not new_text:
+        return jsonify({'error': 'Text cannot be empty'}), 400
+    success = network.edit_message_text(message_id, user.id, new_text)
+    if success:
+        network.save_db()
+        return jsonify({'success': True})
+    return jsonify({'error': 'Message not found or not yours'}), 403
+
+@app.route('/api/messages/<message_id>/delete', methods=['POST'])
+@login_required
+def api_delete_message(message_id):
+    if request.form.get('_method') != 'DELETE':
+        return jsonify({'error': 'Method not allowed'}), 405
+    user = current_user()
+    scope = request.form.get('scope', 'me')
+    success = network.delete_message_for_user(message_id, user.id, scope)
+    if success:
+        network.save_db()
+        return jsonify({'success': True})
+    return jsonify({'error': 'Could not delete message'}), 403
+
+# ---------- Профиль ----------
 @app.route('/user/<user_id>')
 @login_required
 def user_profile(user_id):
@@ -224,4 +329,5 @@ def user_profile(user_id):
     return render_template('user_profile.html', profile=profile)
 
 if __name__ == '__main__':
-    app.run(debug=False, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
