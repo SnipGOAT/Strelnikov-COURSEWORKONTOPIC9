@@ -15,9 +15,11 @@
     {% for item in feed %}
         <div class="post">
             <div class="post-header">
-                <div class="avatar">{{ item.author[0] }}</div>
+                <a href="/user/{{ item.author_id }}" class="avatar-link">
+                    <div class="avatar">{{ item.author[0] }}</div>
+                </a>
                 <div>
-                    <div class="post-author">{{ item.author }}</div>
+                    <a href="/user/{{ item.author_id }}" class="post-author-link">{{ item.author }}</a>
                     <div class="post-time">{{ item.post.timestamp }}</div>
                 </div>
             </div>
