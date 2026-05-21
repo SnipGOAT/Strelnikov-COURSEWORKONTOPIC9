@@ -1,40 +1,33 @@
 {% extends "layout.html" %}
 {% block content %}
-<h2>Сообщения</h2>
-
-<h3>Отправить сообщение</h3>
-<form action="/messages/send" method="post">
-    <input type="text" name="username" placeholder="Кому (логин)" required>
-    <textarea name="text" placeholder="Текст сообщения" required></textarea>
-    <button type="submit" class="btn btn-primary">Отправить</button>
-</form>
-
-<h3>Входящие</h3>
-{% for m in inbox %}
-    <div class="message {% if m.message.is_read %}read{% else %}unread{% endif %}">
-        <strong>От: {{ m.sender_name }}</strong>
-        <p>{{ m.message.text }}</p>
-        <small>{{ m.message.timestamp }}</small>
-        {% if not m.message.is_read %}
-            <form action="/messages/read/{{ m.message.id }}" method="post" style="display:inline">
-                <button type="submit" class="btn btn-accent">Прочитано</button>
-            </form>
-        {% else %}
-            <span class="read-badge">✓ Прочитано</span>
-        {% endif %}
+<div class="chat-wrapper" id="chatWrapper">
+    <div class="chat-sidebar" id="chatSidebar">
+        <div class="sidebar-header">💬 Чаты</div>
+        <div id="contacts-list" class="contacts-list">
+            <!-- Контакты загрузятся через JS -->
+        </div>
     </div>
-{% else %}
-    <p>Нет входящих сообщений.</p>
-{% endfor %}
-
-<h3>Исходящие</h3>
-{% for m in outbox %}
-    <div class="message outgoing">
-        <strong>Кому: {{ m.receiver_name }}</strong>
-        <p>{{ m.message.text }}</p>
-        <small>{{ m.message.timestamp }}</small>
+    <div class="chat-main" id="chatMain">
+        <div class="chat-header" id="chat-header">
+            <button class="mobile-back-btn" id="mobileBackBtn">←</button>
+            <span id="chatHeaderTitle">Выберите чат</span>
+        </div>
+        <div class="messages-container" id="messages-box">
+            <!-- Сообщения -->
+        </div>
+        <div id="attachment-preview" class="attachment-preview-area" style="display: none;">
+            <div class="attachment-preview-content">
+                <img id="attachment-preview-img" src="" alt="preview" class="attachment-preview-img">
+                <span id="attachment-preview-name" class="attachment-preview-name"></span>
+                <button id="attachment-remove-btn" class="attachment-remove-btn" title="Удалить файл">✕</button>
+            </div>
+        </div>
+        <div class="chat-input-area" id="chat-input-area" style="display: none;">
+            <input type="text" id="message-input" placeholder="Введите сообщение..." autocomplete="off">
+            <label for="attachment-input" class="file-attach-label" id="file-label">📎</label>
+            <input type="file" id="attachment-input" style="display: none;">
+            <button id="send-button">➤</button>
+        </div>
     </div>
-{% else %}
-    <p>Нет исходящих сообщений.</p>
-{% endfor %}
+</div>
 {% endblock %}
