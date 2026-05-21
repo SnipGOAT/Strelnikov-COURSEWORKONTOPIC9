@@ -1,6 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
 <h2>Профиль: {{ profile.username }}</h2>
+
+<a href="/messages?contact={{ profile.id }}" class="btn btn-accent" style="margin-bottom: 20px; display: inline-block;">
+    <i class="fas fa-comment-dots"></i> Написать сообщение
+</a>
+
 <p>Всего публикаций: {{ profile.get_posts()|length }}</p>
 
 <h3>Публикации</h3>
