@@ -1,21 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
 <h2>Друзья</h2>
-<form action="/friends/add" method="post">
+<form action="/friends/add" method="post" class="add-friend-form">
     <input type="text" name="username" placeholder="Логин друга" required>
-    <button type="submit">Добавить</button>
+    <button type="submit" class="btn btn-primary">Добавить</button>
 </form>
 
-<ul>
+<div class="friend-list">
 {% for friend in friends %}
-    <li>
-        <a href="/user/{{ friend.id }}">{{ friend.username }}</a>
-        <form action="/friends/remove/{{ friend.id }}" method="post" style="display:inline">
-            <button type="submit">Удалить</button>
+    <div class="friend-card-wrapper">
+        <a href="/messages?contact={{ friend.id }}" class="friend-card-link">
+            <div class="friend-card">
+                <div class="friend-avatar">{{ friend.username[0] }}</div>
+                <div class="friend-name">{{ friend.username }}</div>
+            </div>
+        </a>
+        <form action="/friends/remove/{{ friend.id }}" method="post" class="remove-friend-form">
+            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
         </form>
-    </li>
+    </div>
 {% else %}
-    <p>Список друзей пуст.</p>
+    <p class="no-friends">Список друзей пуст.</p>
 {% endfor %}
-</ul>
+</div>
 {% endblock %}
