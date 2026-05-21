@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Чат с {{ other_user.username }}</h2>
+
+<div class="chat-box">
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="message-bubble {% if msg.author_id == user.id %}sent{% else %}received{% endif %}">
+                <p>{{ msg.text }}</p>
+                <small>{{ msg.timestamp }}</small>
+                {% if msg.receiver_id == user.id and not msg.is_read %}
+                    <span class="new-badge">Новое</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Нет сообщений. Напишите первым!</p>
+    {% endif %}
+</div>
+
+<form action="/chat/{{ other_user.id }}" method="post" class="chat-form">
+    <textarea name="text" rows="2" placeholder="Ваше сообщение..." required></textarea>
+    <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+{% endblock %}
