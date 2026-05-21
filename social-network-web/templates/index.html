@@ -3,10 +3,13 @@
 
 {% if landing %}
     <div class="landing">
-        <h1>Добро пожаловать в MAX!</h1>
+        <h1>Добро пожаловать в MAX 2.0!</h1>
         <p class="landing-text">
-            Современная социальная сеть с современным дизайном, публикациями, 
+            Современная социальная сеть с современным дизайном, публикациями,
             друзьями и личными сообщениями. Присоединяйтесь к нам!
+        </p>
+        <p class="landing-text">
+            Соцсеть в бета-тестировании, поэтому могут быть неполадки в работе и изменения его работы)
         </p>
         <div class="landing-buttons">
             <a href="/login" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Войти</a>
@@ -19,9 +22,11 @@
         {% for item in feed %}
             <div class="post">
                 <div class="post-header">
-                    <div class="avatar">{{ item.author[0] }}</div>
+                    <a href="/user/{{ item.author_id }}" class="avatar-link">
+                        <div class="avatar">{{ item.author[0] }}</div>
+                    </a>
                     <div>
-                        <div class="post-author">{{ item.author }}</div>
+                        <a href="/user/{{ item.author_id }}" class="post-author-link">{{ item.author }}</a>
                         <div class="post-time">{{ item.post.timestamp }}</div>
                     </div>
                 </div>
