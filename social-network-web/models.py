@@ -48,7 +48,6 @@ class Post(Content):
         return f"[ПУБЛИКАЦИЯ] ({self._timestamp})\nТекст: {self._text}\nЛайки: {len(self._liked_by)}"
 
     def toggle_like(self, user_id: str):
-        """Добавляет или убирает лайк пользователя. Возвращает (количество лайков, True если теперь лайкнуто)."""
         if user_id in self._liked_by:
             self._liked_by.remove(user_id)
             liked = False
@@ -81,7 +80,6 @@ class Post(Content):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Post':
-        # поддержка старых данных, где было поле 'likes'
         liked_by = data.get('liked_by', [])
         if not liked_by and 'likes' in data:
             liked_by = []
@@ -92,10 +90,12 @@ class Post(Content):
 
 
 class Message(Content):
-    def __init__(self, text: str, author_id: str, receiver_id: str):
+    def __init__(self, text: str, author_id: str, receiver_id: str, attachment: str = None, edited: bool = False):
         super().__init__(text, author_id)
         self._receiver_id = receiver_id
         self._is_read = False
+        self._attachment = attachment
+        self._edited = edited
 
     def render(self) -> str:
         status = "Прочитано" if self._is_read else "Новое"
@@ -116,6 +116,14 @@ class Message(Content):
     def text(self):
         return self._text
 
+    @property
+    def attachment(self):
+        return self._attachment
+
+    @property
+    def edited(self):
+        return self._edited
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "Message",
@@ -124,12 +132,14 @@ class Message(Content):
             "author_id": self._author_id,
             "receiver_id": self._receiver_id,
             "timestamp": self._timestamp,
-            "is_read": self._is_read
+            "is_read": self._is_read,
+            "attachment": self._attachment,
+            "edited": self._edited
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'Message':
-        msg = cls(data['text'], data['author_id'], data['receiver_id'])
+        msg = cls(data['text'], data['author_id'], data['receiver_id'], data.get('attachment'), data.get('edited', False))
         msg._id = data['id']
         msg._timestamp = data['timestamp']
         msg._is_read = data.get('is_read', False)
@@ -209,6 +219,70 @@ class User:
 
     def get_unread_messages_count(self) -> int:
         return sum(1 for msg in self._inbox if not msg.is_read)
+
+    def get_contacts(self) -> List[Dict[str, Any]]:
+        contacts = {}
+        for msg in self._inbox:
+            contact_id = msg.author_id
+            if contact_id not in contacts:
+                contacts[contact_id] = {
+                    'user_id': contact_id,
+                    'last_msg_time': msg.timestamp,
+                    'unread': 0 if msg.is_read else 1
+                }
+            else:
+                if msg.timestamp > contacts[contact_id]['last_msg_time']:
+                    contacts[contact_id]['last_msg_time'] = msg.timestamp
+                if not msg.is_read:
+                    contacts[contact_id]['unread'] += 1
+
+        for msg in self._outbox:
+            contact_id = msg.receiver_id
+            if contact_id not in contacts:
+                contacts[contact_id] = {
+                    'user_id': contact_id,
+                    'last_msg_time': msg.timestamp,
+                    'unread': 0
+                }
+            else:
+                if msg.timestamp > contacts[contact_id]['last_msg_time']:
+                    contacts[contact_id]['last_msg_time'] = msg.timestamp
+
+        sorted_contacts = sorted(contacts.values(), key=lambda x: x['last_msg_time'], reverse=True)
+        return sorted_contacts
+
+    def get_conversation_with(self, contact_id: str, mark_read: bool = True) -> List[Dict[str, Any]]:
+        messages = []
+        for msg in self._inbox:
+            if msg.author_id == contact_id:
+                if mark_read and not msg.is_read:
+                    msg.mark_as_read()
+                messages.append({
+                    'id': msg.id,
+                    'text': msg.text,
+                    'from': msg.author_id,
+                    'to': msg.receiver_id,
+                    'time': msg.timestamp,
+                    'direction': 'in',
+                    'is_read': msg.is_read,
+                    'attachment': msg.attachment,
+                    'edited': msg.edited
+                })
+        for msg in self._outbox:
+            if msg.receiver_id == contact_id:
+                messages.append({
+                    'id': msg.id,
+                    'text': msg.text,
+                    'from': msg.author_id,
+                    'to': msg.receiver_id,
+                    'time': msg.timestamp,
+                    'direction': 'out',
+                    'is_read': msg.is_read,
+                    'attachment': msg.attachment,
+                    'edited': msg.edited
+                })
+        messages.sort(key=lambda x: x['time'])
+        return messages
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -294,3 +368,76 @@ class SocialNetwork:
             if post:
                 return post
         return None
+
+    # ---------- Новые методы для сообщений ----------
+    def find_message_global(self, message_id: str) -> Optional[Message]:
+        """Найти сообщение по id среди всех пользователей."""
+        for user in self._users.values():
+            for msg in user._inbox + user._outbox:
+                if msg.id == message_id:
+                    return msg
+        return None
+
+    def delete_message_for_user(self, message_id: str, user_id: str, scope: str) -> bool:
+        """
+        Удалить сообщение: scope='me' — удалить только у себя (из своих списков),
+        scope='all' — удалить у всех (только если пользователь отправитель).
+        Возвращает True, если удаление выполнено.
+        """
+        user = self.find_user_by_id(user_id)
+        if not user:
+            return False
+
+        # Ищем сообщение в inbox или outbox пользователя
+        target_msg = None
+        for msg in user._inbox + user._outbox:
+            if msg.id == message_id:
+                target_msg = msg
+                break
+
+        if not target_msg:
+            return False
+
+        if scope == 'all':
+            # Удалить для всех может только отправитель
+            if target_msg.author_id != user_id:
+                return False
+            # Удаляем у получателя
+            receiver = self.find_user_by_id(target_msg.receiver_id)
+            if receiver:
+                self._remove_message_from_lists(receiver, message_id)
+            # Удаляем у отправителя
+            self._remove_message_from_lists(user, message_id)
+            return True
+        else:  # scope == 'me'
+            self._remove_message_from_lists(user, message_id)
+            return True
+
+    def _remove_message_from_lists(self, user: 'User', message_id: str):
+        """Удалить сообщение из inbox и outbox конкретного пользователя (по id)."""
+        for lst in (user._inbox, user._outbox):
+            for i, msg in enumerate(lst):
+                if msg.id == message_id:
+                    del lst[i]
+                    return
+
+    def edit_message_text(self, message_id: str, user_id: str, new_text: str) -> bool:
+        """Редактировать текст своего сообщения (обновляет копии у отправителя и получателя)."""
+        user = self.find_user_by_id(user_id)
+        if not user:
+            return False
+        # Ищем сообщение в outbox пользователя (только отправитель может редактировать)
+        for msg in user._outbox:
+            if msg.id == message_id:
+                msg._text = new_text
+                msg._edited = True
+                # Обновляем копию у получателя
+                receiver = self.find_user_by_id(msg.receiver_id)
+                if receiver:
+                    for rmsg in receiver._inbox:
+                        if rmsg.id == message_id:
+                            rmsg._text = new_text
+                            rmsg._edited = True
+                            break
+                return True
+        return False
